@@ -21,6 +21,9 @@ const DEFAULTS = {
   minDelayMs: 180,
   maxDelayMs: 1800,
   stripTrailingChars: '。',
+  stripOnlyLast: true,
+  keepStructured: true,
+  dedupeWindowMs: 8000,
   onlyTags: ['sendMarkdown'],
 };
 
@@ -38,6 +41,8 @@ const SENTENCE_END = /(?<=[。！？!?；;…\n])/;
 function splitText(text, cfg) {
   const raw = String(text ?? '').trim();
   if (!raw) return [];
+  // 表格 / 代码块整体发，切开会毁掉结构
+  if (cfg.keepStructured !== false && (raw.includes('```') || /\n\s*\|[^\n]*\|/.test(raw))) return [raw];
   let parts = raw.split(SENTENCE_END).map((s) => s.trim()).filter(Boolean);
 
   const merged = [];
@@ -120,7 +125,12 @@ export function waifuPlan(text, limit, tag, _config) {
     }
   }
 
-  const pieces = splitText(text, cfg).map((s) => stripTail(s, cfg.stripTrailingChars));
+  const pieces = splitText(text, cfg).map((s, i, arr) => {
+    // 只去最后一条的结尾标点，中间分条的句号保留（承担断句作用）
+    const isLast = i === arr.length - 1;
+    if (!isLast && cfg.stripOnlyLast !== false) return s;
+    return stripTail(s, cfg.stripTrailingChars);
+  });
   // 分句失败（比如整条没有标点）就退回原来的长度切分
   if (pieces.length <= 1) return base;
 
