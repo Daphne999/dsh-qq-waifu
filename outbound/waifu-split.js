@@ -22,6 +22,7 @@ const DEFAULTS = {
   maxDelayMs: 1800,
   stripTrailingChars: '。',
   stripOnlyLast: true,
+  stripOnlyLastWhenLong: 60,
   keepStructured: true,
   dedupeWindowMs: 8000,
   onlyTags: ['sendMarkdown'],
@@ -125,14 +126,19 @@ export function waifuPlan(text, limit, tag, _config) {
     }
   }
 
+  const longReply = String(text ?? '').trim().length > (cfg.stripOnlyLastWhenLong ?? 60);
   const pieces = splitText(text, cfg).map((s, i, arr) => {
     // 只去最后一条的结尾标点，中间分条的句号保留（承担断句作用）
     const isLast = i === arr.length - 1;
-    if (!isLast && cfg.stripOnlyLast !== false) return s;
+    if (!isLast && cfg.stripOnlyLast !== false && longReply) return s;
     return stripTail(s, cfg.stripTrailingChars);
   });
-  // 分句失败（比如整条没有标点）就退回原来的长度切分
-  if (pieces.length <= 1) return base;
+  // 只有一片（表格/代码块整条、或本来就没有句子边界）：
+  // 仍然要把这一片的结尾标点去掉，不能直接返回原文
+  if (pieces.length <= 1) {
+    const only = pieces[0];
+    return only === undefined ? base : [{ text: only, delayMs: 0 }];
+  }
 
   return pieces.map((p, i) => ({
     text: p,

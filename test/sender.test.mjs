@@ -12,7 +12,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     },
     { fixedDelayMs: 5 },
   );
-  const ok = res.failedAt === null && got.length === 3 && got[0] === '我回来了。' && got[2] === '不过还好';
+  const ok = res.failedAt === null && got.length === 3 && got[0] === '我回来了' && got[2] === '不过还好';
   console.log(`${ok ? '✅' : '❌'} 逐条发送: ${JSON.stringify(got)}`);
   if (!ok) process.exit(1);
 }
