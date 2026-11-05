@@ -20,7 +20,7 @@ const cases = [
 
 let bad = 0;
 for (const c of cases) {
-  const out = splitReply(c.input, { maxChunks: 5 });
+  const out = splitReply(c.input, { maxChunks: 5, stripTrailingChars: '' });
   const joined = out.join('').replace(/\s/g, '');
   const sameText = c.input === '' ? out.length === 0 : joined === c.input.replace(/\s/g, '');
   const countOk =
@@ -40,3 +40,11 @@ console.log(`${dOk ? '✅' : '❌'} 打字延迟: 短句 ${d1}ms / 长句 ${d2}m
 
 console.log(bad === 0 ? '\n✅ 切分逻辑全部符合预期' : `\n❌ ${bad} 项不符合预期`);
 process.exit(bad === 0 ? 0 : 1);
+
+// 去句号：默认行为（只去句号，保留？！）
+{
+  const out = splitReply('装好了。它真的能分条了。你要不要试一下？');
+  const ok = out.length === 3 && out[0] === '装好了' && out[1] === '它真的能分条了' && out[2] === '你要不要试一下？';
+  console.log(`${ok ? '✅' : '❌'} 去句号: ${JSON.stringify(out)}`);
+  if (!ok) process.exit(1);
+}

@@ -1,6 +1,6 @@
 {
   "name": "dsh-qq-waifu",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Waifu-mode replies for DSH on QQ: split one reply into several short chat bubbles with a human-like typing pace, plus configurable chunking. | 把 OPERIT 的 Waifu 模式搬到 QQ：一条回复切成几句、按打字速度逐条发送。",
   "type": "module",
   "main": "lib/index.js",
